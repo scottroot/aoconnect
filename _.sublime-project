@@ -1,0 +1,38 @@
+{
+    "build_systems":
+    [
+        {
+    			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+    			"name": "Python Builder",
+    			"selector": "source.python",
+    			"shell_cmd": "\"python\" -u \"$file\""
+    		},
+        {
+            "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+            "name": "Node Builder",
+            "selector": "source.js",
+            "shell_cmd": "node $file",
+        }
+    ],
+    "folders":
+    [
+        {
+            "follow_symlinks": true,
+            "path": ".",
+        }
+    ],
+    "settings":
+    {
+        "LSP":
+        {
+    			"LSP-typescript":
+    			{
+    				"enabled": true,
+    			},
+          "LSP-eslint":
+          {
+    				"enabled": true,
+    			},
+        },
+    },
+}

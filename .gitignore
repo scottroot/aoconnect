@@ -1,13 +1,3 @@
-.DS_Store
-wallet.json
-dist
-.VSCodeCounter
 node_modules
-foo.js
-.env
-ao-cache
-
-# terraform
-.terraform
-.terragrunt-cache
-terraform/*.plan
+dist
+ao-cache*
