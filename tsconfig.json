@@ -1,55 +1,29 @@
 {
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true,
-    "declaration": true,
-    "lib": [
-      "es2022",
-      "dom"
-    ],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": ["ESNext", "DOM"],
     "esModuleInterop": true,
-    "alwaysStrict": true,
-    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitAny": false,
-    "noImplicitThis": false,
-    "strictNullChecks": true,
-    "importHelpers": true,
-    "baseUrl": ".",
-    "rootDir": ".",
-    "experimentalDecorators": true,
+//    "outDir": "./dist",
+//    "baseUrl": "./",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": "./src",
     "paths": {
-      "*": ["node_modules/*"],
-      "$/utils": [
-        "node/utils.ts"
-      ]
-    }
-  }
-//  "ts-node": {
-//    "require": [
-//      "tsconfig-paths/register"
-//    ],
-//    "esm": false,
-//    "transpileOnly": true,
-//    "compilerOptions": {
-//      "module": "CommonJS"
+      "*": ["*"]
+    },
+//    "paths": {
+//      "*": ["src/*"]
 //    }
-//  },
-//  "include": [
-//    "src/**/*",
-//    "scripts/**/*",
-//  ],
-//  "exclude": [
-//    "**/__tests__/**/*",
-//    "tests/**"
-//  ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/global.d.ts"
+  ],
+  "exclude": ["node_modules", "dist", "archive"]
 }

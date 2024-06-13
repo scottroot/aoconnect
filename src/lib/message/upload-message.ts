@@ -1,7 +1,7 @@
-import { removeTagsByNameMaybeValue } from "../utils.js";
-import type { Logger } from "../../logger.js";
-import type { Tag } from "../../types.js";
-import { tagsSchema } from "../../types.js";
+import { removeTagsByNameMaybeValue } from "../utils";
+import type { Logger } from "../../logger";
+import type { Tag } from "../../types";
+import { tagSchema } from "../../dal";
 
 
 export interface MessageContext {
@@ -27,7 +27,8 @@ export function buildTags(ctx: MessageContext): MessageContext {
     { name: "SDK", value: "aoconnect" },
   ];
 
-  newTags = tagsSchema.parse(newTags);
+  // newTags = tagsSchema.parse(newTags);
+  newTags = newTags.map(tag => tagSchema.parse(tag) as Tag);
 
   return {
     ...rest,

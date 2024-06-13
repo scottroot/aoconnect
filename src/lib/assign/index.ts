@@ -1,11 +1,11 @@
-import { errFrom } from "../utils.js";
-import { sendAssign } from "./send-assign.js";
-import type { WriteAssignArgs } from "../../client/ao-mu.js";
-import type { Logger } from "../../logger.js";
+import { errFrom } from "../utils";
+import type { Logger } from "../../logger";
+import { sendAssign } from "./send-assign";
+import type { DeployAssignArgs, DeployAssignReturn } from "../../client/ao-mu";
 
 
-export interface GetAssignProps {
-  deployAssign: (args: WriteAssignArgs) => Promise<{ res: any; assignmentId: string }>;
+export interface GetAssign {
+  deployAssign: (args: DeployAssignArgs) => Promise<DeployAssignReturn>;
   logger: Logger;
 }
 
@@ -18,7 +18,7 @@ export interface AssignFuncArgs {
   baseLayer?: boolean;
 }
 
-export function getAssign(env: GetAssignProps): AssignFunc {
+export function getAssign(env: GetAssign): AssignFunc {
   return async (args: AssignFuncArgs) => {
     try {
       return await sendAssign(env, args);

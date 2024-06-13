@@ -1,16 +1,16 @@
-import { errFrom } from "../utils.js";
-import type { MessageContext } from "./upload-message.js";
-import { buildData, buildTags } from "./upload-message.js";
-import type { Logger } from "../../logger.js";
-import type { LoadProcessMetaArgs } from "../../client/ao-su.js";
-import type { DeployMessageArgs, DeployMessageReturn, RegisterProcessArgs } from "../../client/ao-mu.js";
-import { deployMessageSchema, signerSchema } from "../../dal.js";
-import type { Signer, Tag } from "../../types.js";
+import { errFrom } from "../utils";
+import type { MessageContext } from "./upload-message";
+import { buildData, buildTags } from "./upload-message";
+import type { Logger } from "../../logger";
+import type { LoadProcessMetaArgs } from "../../client/ao-su";
+import type { DeployMessageArgs, DeployMessageReturn } from "../../client/ao-mu";
+import { deployMessageSchema, signerSchema } from "../../dal";
+import type { Signer, Tag } from "../../types";
 
 
-export interface GetMessageProps {
+export interface GetMessage {
   loadProcessMeta: ({ suUrl, processId }: LoadProcessMetaArgs) => Promise<any>;
-  deployMessage: (args: RegisterProcessArgs, ...args_1: unknown[]) => Promise<DeployMessageReturn>;
+  deployMessage: (args: DeployMessageArgs, ...args_1: unknown[]) => Promise<DeployMessageReturn>;
   logger: Logger;
 }
 
@@ -24,7 +24,7 @@ export interface MessageFuncArgs {
 
 export type MessageFunc = (args: MessageFuncArgs) => Promise<DeployMessageReturn>;
 
-export function getMessage(env: GetMessageProps): MessageFunc {
+export function getMessage(env: GetMessage): MessageFunc {
   const deployMessage = deployMessageSchema.implement(env.deployMessage);
   return async (ctx: MessageContext): Promise<DeployMessageReturn> => {
     try {

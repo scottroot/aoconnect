@@ -1,16 +1,17 @@
-import { LRUMap } from "mnemonist";
-import {Tag} from "../types.js";
+import type { LRUMap as LruMap } from "mnemonist";
+import LRUMap from "mnemonist/lru-map.js";
+import type { Tag } from "../types";
 
-type ProcessMetaCache = LRUMap<string, any>;
+
+type ProcessMetaCache = LruMap<string, any>;
 
 let processMetaCache: ProcessMetaCache;
 
-export const createProcessMetaCache = ({ MAX_SIZE }): ProcessMetaCache => {
+export const createProcessMetaCache = ({ MAX_SIZE }: { MAX_SIZE: number }): ProcessMetaCache => {
   if (processMetaCache) return processMetaCache;
   processMetaCache = new LRUMap(MAX_SIZE);
   return processMetaCache;
 };
-
 
 export interface SUEnv {
   logger: (message: string, ...args: any[]) => void;
@@ -35,7 +36,7 @@ export class LoadProcessMeta {
   }
 
   // async execute({ suUrl, processId }: LoadProcessMetaArgs): Promise<any> {
-  async execute({ suUrl, processId }: LoadProcessMetaArgs): Promise<{ tags: Tag[], [key: string]: any }> {
+  async execute({ suUrl, processId }: LoadProcessMetaArgs): Promise<{ tags: Tag[]; [key: string]: any }> {
     if (this.cache.has(processId)) {
       return this.cache.get(processId);
     }
@@ -51,7 +52,7 @@ export class LoadProcessMeta {
       this.logger("Caching process meta for process '%s'", processId);
       this.cache.set(processId, { tags: meta.tags });
       return meta;
-    } catch (error) {
+    } catch (error: any) {
       this.logger("Error: %s", error.message);
       throw error;
     }

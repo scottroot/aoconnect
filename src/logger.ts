@@ -17,6 +17,5 @@ export const createLogger = (name = "aoconnect-ts"): Logger => {
       logger(note, ...rest, arg);
       return arg;
     };
-
   return logger;
 };

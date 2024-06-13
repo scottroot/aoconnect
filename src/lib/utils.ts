@@ -3,7 +3,8 @@ import type { ZodIssue } from "zod";
 import type { ParsedTags, Tag } from "../types.js";
 
 
-export const joinUrl = ({ url, path }: { url: string; path?: string }): string => {
+// export const joinUrl = ({ url, path }: { url: string; path?: string }): string => {
+const joinUrl = ({ url, path }: { url: string; path?: string }): string => {
   if (!path) return url;
   if (path.startsWith("/")) {
     path = path.slice(1);
@@ -19,7 +20,8 @@ export const joinUrl = ({ url, path }: { url: string; path?: string }): string =
  * If multiple tags with the same name exist, its value will be the array of tag values
  * in order of appearance.
  */
-export function parseTags(rawTags: Tag[] = []): ParsedTags {
+// export function parseTags(rawTags: Tag[] = []): ParsedTags {
+function parseTags(rawTags: Tag[] = []): ParsedTags {
   // Reduce the rawTags array into an object
   const tagMap = rawTags.reduce<ParsedTags>((acc, tag) => {
     if (!acc[tag.name]) {
@@ -45,7 +47,9 @@ export function parseTags(rawTags: Tag[] = []): ParsedTags {
  * @param {string} [criteria.value] - An optional value. If specified, only tags with both the matching name and value are removed.
  * @returns {Tag[]} A new array of Tag objects with the tags matching the given criteria removed.
  */
-export function removeTagsByNameMaybeValue(tags: Tag[], { name, value }: { name: string; value?: string }): Tag[] {
+
+// export function removeTagsByNameMaybeValue(tags: Tag[], { name, value }: { name: string; value?: string }): Tag[] {
+function removeTagsByNameMaybeValue(tags: Tag[], { name, value }: { name: string; value?: string }): Tag[] {
   return tags.filter((tag) => {
     if (tag.name !== name) {
       return true;
@@ -57,7 +61,8 @@ export function removeTagsByNameMaybeValue(tags: Tag[], { name, value }: { name:
   });
 }
 
-export function eqOrIncludes(data: any, valToCheck: any): boolean {
+// export function eqOrIncludes(data: any, valToCheck: any): boolean {
+function eqOrIncludes(data: any, valToCheck: any): boolean {
   if (typeof data === "string") {
     return data === valToCheck;
   } else if (Array.isArray(data)) {
@@ -67,7 +72,8 @@ export function eqOrIncludes(data: any, valToCheck: any): boolean {
   }
 }
 
-export function trimSlash(text = ""): string {
+// export function trimSlash(text = ""): string {
+function trimSlash(text = ""): string {
   if (!text.endsWith("/")) return text;
   return trimSlash(text.slice(0, -1));
 }
@@ -97,7 +103,8 @@ function isZodError(err: any): err is ZodError {
  * console.error(standardError);
  * ```
  */
-export function errFrom(err: any): Error {
+// export function errFrom(err: any): Error {
+function errFrom(err: any): Error {
   let e: Error;
   /**
    * Imperative to not inflate the stack trace
@@ -122,18 +129,19 @@ function gatherZodIssues(zodErr: ZodError, status: number, contextCode: string):
   return zodErr.issues.reduce((issues: any[], issue: ZodIssue) => {
     switch (issue.code) {
       case ZodIssueCode.invalid_arguments:
-        return issues.concat(gatherZodIssues(issue.argumentsError!, 422, "Invalid Arguments"));
+        return issues.concat(gatherZodIssues(issue.argumentsError, 422, "Invalid Arguments"));
       case ZodIssueCode.invalid_return_type:
-        return issues.concat(gatherZodIssues(issue.returnTypeError!, 500, "Invalid Return"));
+        return issues.concat(gatherZodIssues(issue.returnTypeError, 500, "Invalid Return"));
       case ZodIssueCode.invalid_union:
-        return issues.concat(issue.unionErrors!.flatMap((i) => gatherZodIssues(i, 400, "Invalid Union")));
+        return issues.concat(issue.unionErrors.flatMap((i) => gatherZodIssues(i, 400, "Invalid Union")));
       default:
         return issues.concat({ ...issue, status, contextCode });
     }
   }, []);
 }
 
-export function mapZodErr(zodErr: ZodError): string {
+// export function mapZodErr(zodErr: ZodError): string {
+function mapZodErr(zodErr: ZodError): string {
   const zodIssues = gatherZodIssues(zodErr, 400, "");
 
   const summaries = zodIssues.reduce((acc: string[], zodIssue: any) => {
@@ -147,3 +155,5 @@ export function mapZodErr(zodErr: ZodError): string {
 
   return summaries.join(" | ");
 }
+
+export { mapZodErr, errFrom, trimSlash, eqOrIncludes, removeTagsByNameMaybeValue, parseTags, joinUrl }

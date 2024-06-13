@@ -1,12 +1,18 @@
 import { describe, test } from "node:test";
 import * as assert from "node:assert";
 
-import { readWith } from "./read.js";
+import { read } from "./read";
+import type { GetResult } from "./index";
+import { createLogger } from "../../logger";
 
+
+const logger = createLogger("monitor");
 
 describe("read", () => {
   test("should return the output", async () => {
-    const read = readWith({
+    const env: GetResult = {
+      logger,
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       loadResult: async (args) => {
         assert.deepStrictEqual(args, {
           id: "message-123",
@@ -35,12 +41,12 @@ describe("read", () => {
           spawns: [],
         };
       },
-    });
-
-    const res = await read({
+    };
+    const args = {
       id: "message-123",
       processId: "process-123",
-    });
+    };
+    const res = await read(env, args);
 
     assert.deepStrictEqual(res, {
       output: "",

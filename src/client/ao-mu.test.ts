@@ -1,9 +1,10 @@
 import { describe, test } from "node:test";
 import * as assert from "node:assert";
 
-import { createLogger } from "../logger.js";
-import { deployMessageSchema, deployMonitorSchema, deployProcessSchema, signerSchema, deployAssignSchema } from "../dal.js";
-import { DeployMessage, DeployProcess, DeployMonitor, DeployAssign } from "./ao-mu.js";
+import { createLogger } from "../logger";
+import { deployMessageSchema, deployMonitorSchema, deployProcessSchema, signerSchema, deployAssignSchema } from "../dal";
+import { DeployMessage, DeployProcess, DeployMonitor, DeployAssign } from "./ao-mu";
+
 
 const MU_URL = globalThis.MU_URL || "https://ao-mu-1.onrender.com";
 const logger = createLogger("@permaweb/ao-sdk:readState");

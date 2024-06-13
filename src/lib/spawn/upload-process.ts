@@ -1,14 +1,13 @@
-import { deployProcessSchema, signerSchema } from "../../dal.js";
-import { removeTagsByNameMaybeValue } from "../utils.js";
-import type { GetSpawnProps, SpawnContext } from "./index.js";
-import type { Logger } from "../../logger.js";
-import type { Tag } from "../../types.js";
-import { tagsSchema } from "../../types.js";
-import type { DeployProcessReturn } from "../../client/ao-mu.js";
+import { deployProcessSchema, signerSchema, tagSchema } from "../../dal";
+import { removeTagsByNameMaybeValue } from "../utils";
+import type { GetSpawn, SpawnContext } from "./index";
+import type { Logger } from "../../logger";
+import type { DataItemSigner, Tag } from "../../types";
+import type { DeployProcessReturn } from "../../client/ao-mu";
 
 
 export function buildTags({ tags, module, scheduler }: SpawnContext): Tag[] {
-  const tagsToRemove = [
+  const tagsToRemove: { name: string, value?: string }[] = [
     { name: "Data-Protocol", value: "ao" },
     { name: "Variant" },
     { name: "Type" },
@@ -16,9 +15,10 @@ export function buildTags({ tags, module, scheduler }: SpawnContext): Tag[] {
     { name: "Scheduler" },
     { name: "SDK" },
   ];
-  let newTags = tagsToRemove.reduce((acc: Tag[], tag: Tag) => {
-    return removeTagsByNameMaybeValue(acc, tag);
-  }, tags || []);
+  const oldTags: Tag[] = tags || [];
+  let newTags = tagsToRemove.reduce((acc, curr) => {
+    return removeTagsByNameMaybeValue(acc, curr);
+  }, oldTags);
 
   newTags = [
     ...newTags,
@@ -30,7 +30,8 @@ export function buildTags({ tags, module, scheduler }: SpawnContext): Tag[] {
     { name: "SDK", value: "aoconnect" },
   ];
 
-  return tagsSchema.parse(newTags);
+  // return tagsSchema.parse(newTags);
+  return newTags.map(tag => tagSchema.parse(tag) as Tag);
 }
 
 export function buildData(ctx: Partial<SpawnContext>, logger: Logger): { data: string | ArrayBuffer; tags: Tag[] } {
@@ -48,7 +49,7 @@ export function buildData(ctx: Partial<SpawnContext>, logger: Logger): { data: s
   };
 }
 
-export async function uploadProcess(env: GetSpawnProps, args: SpawnContext): Promise<DeployProcessReturn> {
+export async function uploadProcess(env: GetSpawn, args: SpawnContext): Promise<DeployProcessReturn> {
   const logger = env.logger.child("uploadProcess");
 
   const { data, tags } = buildData(args, logger);
@@ -58,6 +59,6 @@ export async function uploadProcess(env: GetSpawnProps, args: SpawnContext): Pro
   return await deployProcess({
     data,
     tags: newTags,
-    signer: signerSchema.implement(args.signer),
+    signer: signerSchema.implement(args.signer) as DataItemSigner,
   });
 }

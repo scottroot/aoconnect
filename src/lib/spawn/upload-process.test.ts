@@ -1,8 +1,9 @@
 import { describe, test } from "node:test";
 import * as assert from "node:assert";
 
-import { createLogger } from "../../logger.js";
-import { uploadProcess } from "./upload-process.js";
+import { createLogger } from "../../logger";
+import { uploadProcess } from "./upload-process";
+import type { DeployProcessArgs } from "../../client/ao-mu";
 
 
 const logger = createLogger("createProcess");
@@ -15,7 +16,7 @@ describe("upload-process", () => {
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       validateScheduler: async(_: string) => false,
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      deployProcess: async ({ data, tags, signer }) => {
+      deployProcess: async ({ data, tags, signer }: DeployProcessArgs) => {
         assert.ok(data);
         assert.deepStrictEqual(tags, [
           { name: "foo", value: "bar" },
@@ -36,10 +37,10 @@ describe("upload-process", () => {
         };
       },
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      registerProcess: async (signedDataItem) => {
-        assert.deepStrictEqual(signedDataItem, { id: "process-id-123", raw: "raw-buffer" });
-        return { foo: "bar" };
-      },
+      // registerProcess: async (signedDataItem) => {
+      //   assert.deepStrictEqual(signedDataItem, { id: "process-id-123", raw: "raw-buffer" });
+      //   return { foo: "bar" };
+      // },
       logger,
     };
     const args = {
@@ -66,7 +67,7 @@ describe("upload-process", () => {
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       validateScheduler: async(_: string) => false,
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      deployProcess: async ({ tags }) => {
+      deployProcess: async ({ tags }: DeployProcessArgs) => {
         assert.deepStrictEqual(tags, [
           { name: "Data-Protocol", value: "ao" },
           { name: "Variant", value: "ao.TN.1" },
@@ -102,7 +103,7 @@ describe("upload-process", () => {
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       validateScheduler: async(_: string) => false,
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      deployProcess: async ({ data, tags }) => {
+      deployProcess: async ({ data, tags }: DeployProcessArgs) => {
         assert.equal(data, "foobar");
         /**
          * Assert no Content-Type tag is added

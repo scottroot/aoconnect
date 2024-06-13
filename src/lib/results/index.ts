@@ -1,10 +1,10 @@
-import { errFrom } from "../utils.js";
-import type { QueryResultsArgs, QueryResultsReturn } from "../../client/ao-cu.js";
-import type { Logger } from "../../logger.js";
-import { z } from "zod/index.js";
+import { z } from "zod";
+import { errFrom } from "../utils";
+import type { Logger } from "../../logger";
+import type { QueryResultsArgs, QueryResultsReturn } from "../../client/ao-cu";
 
 
-export interface GetResultsProps {
+export interface GetResults {
   queryResults: ({ process, from, to, sort, limit }: QueryResultsArgs, ...args_1: unknown[]) => Promise<QueryResultsReturn>;
   logger: Logger;
 }
@@ -47,7 +47,7 @@ const outputSchema = z.object({
 
 const queryResultsSchema = z.function().args(inputSchema).returns(z.promise(outputSchema));
 
-export function getResults(env: GetResultsProps): ResultsFunc {
+export function getResults(env: GetResults): ResultsFunc {
   return async function (args: QueryResultsArgs): Promise<ResultsFuncReturn> {
     try {
       const verifiedInput = inputSchema.parse(args);

@@ -1,13 +1,25 @@
-import * as WarpArBundles from 'warp-arbundles'
+import "arconnect";
+// import { createData, ArweaveSigner } from "arbundles/node";
+// import type { JWKInterface , Signer } from "arbundles/node";
+// import type { DataItem, Tag } from "arbundles";
+// import { createData, ArweaveSigner } from "warp-arbundles";
+import * as WarpArbundles from "warp-arbundles";
+// import type { JWKInterface , Signer } from "warp-arbundles/";
+import type { Signer } from "warp-arbundles";
+import type { JWKInterface, DataItemSigner } from "../../types";
 
-// eslint-disable-next-line no-unused-vars
-import { Types } from '../../dal.js'
 
-/**
- * hack to get module resolution working on node jfc
- */
-const pkg = WarpArBundles.default ? WarpArBundles.default : WarpArBundles
-const { createData, ArweaveSigner } = pkg
+const { createData, ArweaveSigner } = WarpArbundles;
+
+// export interface DataItemSignerArgs {
+//   data: any;
+//   tags: Tag[];
+//   target: string;
+//   anchor: string;
+//   createDataItem: (_: any) => DataItem;
+// }
+//
+// export type DataItemSigner = (args: DataItemSignerArgs) => Promise<{ id: string; raw: any }>;
 
 /**
  * A function that builds a signer using a wallet jwk interface
@@ -18,16 +30,14 @@ const { createData, ArweaveSigner } = pkg
  *
  * @returns {Types['signer']}
  */
-export function createDataItemSigner (wallet) {
-  const signer = async ({ data, tags, target, anchor }) => {
-    const signer = new ArweaveSigner(wallet)
-    const dataItem = createData(data, signer, { tags, target, anchor })
-    return dataItem.sign(signer)
-      .then(async () => ({
-        id: await dataItem.id,
-        raw: await dataItem.getRaw()
-      }))
-  }
-
-  return signer
+export function createDataItemSigner (wallet: JWKInterface): DataItemSigner {
+  return async({ data, tags, target, anchor }) => {
+    const signer: Signer = new ArweaveSigner(wallet);
+    const dataItem = createData(data, signer, { tags, target, anchor });
+    await dataItem.sign(signer);
+    return {
+      id: await dataItem.id,
+      raw: await dataItem.getRaw(),
+    };
+  };
 }

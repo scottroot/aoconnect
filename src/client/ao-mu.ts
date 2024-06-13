@@ -1,7 +1,5 @@
-// import { Rejected, fromPromise, of } from 'hyper-async';
-import type { Logger } from "../logger.js";
-import type { Signer, Tag } from "../types.js";
-
+import type { Logger } from "../logger";
+import type { DataItemSigner, Tag } from "../types";
 
 
 export interface MUEnv {
@@ -19,13 +17,14 @@ export interface MUEnv {
 // }
 export type DeployMessageArgs = {
   processId: string;
-  tags: {
-    value: string;
-    name: string;
-  }[];
+  // tags: {
+  //   value: string;
+  //   name: string;
+  // }[];
+  tags: Tag[];
   data?: any;
   anchor?: string | undefined;
-  signer?: any;
+  signer: any;
 }
 export type DeployMessageReturn = {
   messageId: string;
@@ -75,14 +74,14 @@ export class DeployMessage {
 }
 
 
-export interface RegisterProcessArgs {
-  processId: string;
-  data: any;
+export interface DeployProcessArgs {
+  // processId: string;
+  data?: any;
   tags: Tag[];
   anchor?: string;
-  signer: Signer;
+  signer: DataItemSigner;
 }
-  
+
 export type DeployProcessReturn = {
   processId: string;
 };
@@ -98,7 +97,7 @@ export class DeployProcess {
     this.logger = logger.child('deployProcess');
   }
 
-  async execute(args: RegisterProcessArgs): Promise<DeployProcessReturn> {
+  async execute(args: DeployProcessArgs): Promise<DeployProcessReturn> {
     try {
       const { data, tags, signer } = args;
       const signedDataItem = await signer({ data, tags });
@@ -131,13 +130,13 @@ export class DeployProcess {
 
 export interface DeployMonitorArgs {
   processId: string;
-  data: any;
+  data?: any;
   tags: any;
-  anchor: string;
-  signer: Signer;
+  anchor?: string;
+  signer: DataItemSigner;
 }
 export type DeployMonitorResult = {
-  res: any;
+  // res: any;
   messageId: string;
 }
 
@@ -173,8 +172,8 @@ export class DeployMonitor {
       }
       const responseData = { ok: true };
       this.logger.tap('Successfully subscribed to process via MU')(responseData);
-      return { res: responseData, messageId: signedDataItem.id };
-      // return { messageId: signedDataItem.id };
+      // return { res: responseData, messageId: signedDataItem.id };
+      return { messageId: signedDataItem.id };
     } catch (error) {
       this.logger.tap('Error')(error);
       throw error;
@@ -182,13 +181,16 @@ export class DeployMonitor {
   }
 }
 
-export interface UnmonitorResultArgs {
+export interface DeployUnmonitorArgs {
   processId: string;
-  data: any;
-  tags: any;
-  anchor: string;
-  signer: Signer;
+  data?: any;
+  tags: Tag[];
+  anchor?: string;
+  signer: DataItemSigner;
 }
+export type DeployUnmonitorReturn = {
+  messageId: string;
+};
 
 export class DeployUnmonitor {
   private fetch: (url: string, options: RequestInit) => Promise<Response>;
@@ -201,7 +203,7 @@ export class DeployUnmonitor {
     this.logger = logger.child('deployUnmonitor');
   }
 
-  async execute(args: UnmonitorResultArgs): Promise<Record<string, any>> {
+  async execute(args: DeployUnmonitorArgs): Promise<DeployUnmonitorReturn> {
     try {
       const { processId, data, tags, anchor, signer } = args;
       const signedDataItem = await signer({ data, tags, target: processId, anchor });
@@ -222,7 +224,8 @@ export class DeployUnmonitor {
       }
       const responseData = { ok: true };
       this.logger.tap('Successfully unsubscribed to process via MU')(responseData);
-      return { res: responseData, messageId: signedDataItem.id };
+      // return { res: responseData, messageId: signedDataItem.id };
+      return { messageId: signedDataItem.id };
     } catch (error) {
       this.logger.tap('Error')(error);
       throw error;
@@ -231,12 +234,14 @@ export class DeployUnmonitor {
 }
 
 
-export interface WriteAssignArgs {
+export interface DeployAssignArgs {
   process: string;
   message: string;
   exclude?: string[];
   baseLayer?: boolean;
 }
+// export type DeployAssignReturn = { res: any, assignmentId: string };
+export type DeployAssignReturn = { assignmentId: string };
 
 export class DeployAssign {
   private fetch: (url: string, options: RequestInit) => Promise<Response>;
@@ -249,10 +254,13 @@ export class DeployAssign {
     this.logger = logger.child('deployAssign');
   }
 
-  async execute(args: WriteAssignArgs): Promise<{ res: any, assignmentId: string }> {
+  async execute(args: DeployAssignArgs): Promise<DeployAssignReturn> {
     try {
       const { process, message, baseLayer, exclude } = args;
-      const url = `${this.MU_URL}?process-id=${process}&assign=${message}${baseLayer ? '&base-layer' : ''}${exclude ? '&exclude=' + exclude.join(',') : ''}`;
+      // const url = `${this.MU_URL}?process-id=${process}&assign=${message}${baseLayer ? '&base-layer' : ''}${exclude ? '&exclude=' + exclude.join(',') : ''}`;
+      const maybeBaseLayer = baseLayer ? "&base-layer" : "";
+      const maybeExclude = exclude ? "&exclude=" + exclude.join(",") : "";
+      const url = [this.MU_URL, "?", `process-id=${process}`, "&", `assign=${message}`, maybeBaseLayer, maybeExclude].join("");
       const response = await this.fetch(url, {
         method: 'POST',
         headers: {
@@ -267,7 +275,8 @@ export class DeployAssign {
       }
       const responseData = await response.json();
       this.logger.tap('Successfully wrote assignment via MU')(responseData);
-      return { res: responseData, assignmentId: responseData.id };
+      // return { res: responseData, assignmentId: responseData.id };
+      return { assignmentId: responseData.id };
     } catch (error) {
       this.logger.tap('Error')(error);
       throw error;

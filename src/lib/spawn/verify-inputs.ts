@@ -1,17 +1,17 @@
-import { loadTransactionMetaSchema, validateSchedulerSchema } from "../../dal.js";
-import { eqOrIncludes, parseTags } from "../utils.js";
-import type { GetSpawnProps, SpawnContext } from "./index.js";
-import type { Logger } from "../../logger.js";
-import type { LoadTransactionMetaFuncReturn } from "../../client/gateway.js";
+import { loadTransactionMetaSchema, validateSchedulerSchema } from "../../dal";
+import { eqOrIncludes, parseTags } from "../utils";
+import type { GetSpawn, SpawnContext } from "./index";
+import type { Logger } from "../../logger";
+import type { LoadTransactionMetaFuncReturn } from "../../client/gateway";
 
 
-export interface VerifyModuleProps {
+export interface VerifyModule {
   loadTransactionMeta: (id: string, ...args_1: unknown[]) => Promise<LoadTransactionMetaFuncReturn>;
   logger: Logger;
   module: string;
 }
 
-async function verifyModule({ loadTransactionMeta, logger, module }: VerifyModuleProps): Promise<boolean> {
+async function verifyModule({ loadTransactionMeta, logger, module }: VerifyModule): Promise<boolean> {
   try {
     const validator = loadTransactionMetaSchema.implement(loadTransactionMeta);
     const data = await validator(module);
@@ -29,7 +29,13 @@ async function verifyModule({ loadTransactionMeta, logger, module }: VerifyModul
   }
 }
 
-async function verifyScheduler({ logger, validateScheduler, scheduler }): Promise<boolean> {
+export interface VerifyScheduler {
+  logger: Logger;
+  validateScheduler: (address: string) => Promise<boolean>;
+  scheduler: string;
+}
+
+async function verifyScheduler({ logger, validateScheduler, scheduler }: VerifyScheduler): Promise<boolean> {
   try {
     /**
      * Ensure the provider scheduler wallet actually owns
@@ -49,8 +55,11 @@ async function verifyScheduler({ logger, validateScheduler, scheduler }): Promis
     return false;
   }
 }
-
-function verifySigner({ signer, logger }): boolean {
+interface VerifySigner {
+  signer: any;
+  logger: Logger
+}
+function verifySigner({ signer, logger }: VerifySigner): boolean {
   if (!signer) {
     logger.tap("signer not found");
     return false;
@@ -58,7 +67,7 @@ function verifySigner({ signer, logger }): boolean {
   return true;
 }
 
-export async function verifyInputs(env: GetSpawnProps, args: SpawnContext): Promise<boolean> {
+export async function verifyInputs(env: GetSpawn, args: SpawnContext): Promise<boolean> {
   const logger = env.logger.child("verifyInput");
 
   const verifiedModule = await verifyModule({

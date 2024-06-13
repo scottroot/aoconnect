@@ -6,6 +6,30 @@ export const tagSchema = z.object({
   value: z.string(),
 });
 
+export const tagsSchema = z.array(tagSchema);
+
+export const signerSchema = z.function()
+  .args(
+    z.object({
+      data: z.any(),
+      tags: z.array(tagSchema),
+      /**
+       * target must be set with writeMessage,
+       * but not for createProcess
+       */
+      target: z.string().optional(),
+      anchor: z.string().optional(),
+    }),
+  )
+  .returns(
+    z.promise(
+      z.object({
+        id: z.string(),
+        raw: z.any(),
+      }),
+    ),
+  );
+
 // CU
 
 export const dryrunResultSchema = z
@@ -22,8 +46,7 @@ export const dryrunResultSchema = z
   )
   .returns(z.promise(z.any()));
 
-export const loadResultSchema = z
-  .function()
+export const loadResultSchema = z.function()
   .args(
     z.object({
       id: z.string().min(1, { message: "message id is required" }),
@@ -71,7 +94,8 @@ export const deployMessageSchema = z
       data: z.any(),
       tags: z.array(tagSchema),
       anchor: z.string().optional(),
-      signer: z.any(),
+      // signer: z.any(),
+      signer: signerSchema,
     }),
   )
   .returns(
@@ -84,13 +108,14 @@ export const deployMessageSchema = z
     ),
   );
 
-export const deployProcessSchema = z
-  .function()
+export const deployProcessSchema = z.function()
   .args(
     z.object({
       data: z.any(),
       tags: z.array(tagSchema),
-      signer: z.any(),
+      // signer: z.any(),
+      // signer: z.function().returns(z.promise(z.any())),
+      signer: signerSchema,
     }),
   )
   .returns(
@@ -175,28 +200,6 @@ export const loadTransactionMetaSchema = z
     ),
   );
 
-export const signerSchema = z
-  .function()
-  .args(
-    z.object({
-      data: z.any(),
-      tags: z.array(tagSchema),
-      /**
-       * target must be set with writeMessage,
-       * but not for createProcess
-       */
-      target: z.string().optional(),
-      anchor: z.string().optional(),
-    }),
-  )
-  .returns(
-    z.promise(
-      z.object({
-        id: z.string(),
-        raw: z.any(),
-      }),
-    ),
-  );
 
 /**
  * A hack to get reuse JSDoc types in other files

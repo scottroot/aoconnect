@@ -1,9 +1,10 @@
 import { describe, test } from "node:test";
 import * as assert from "node:assert";
 
-import { LoadProcessMeta } from "./ao-su.js";
-import { loadProcessMetaSchema } from "../dal.js";
-import { createLogger } from "../logger.js";
+import { LoadProcessMeta } from "./ao-su";
+import { loadProcessMetaSchema } from "../dal";
+import { createLogger } from "../logger";
+
 
 const logger = createLogger("ao-cu");
 

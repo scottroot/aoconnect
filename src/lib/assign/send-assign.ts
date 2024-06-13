@@ -1,8 +1,9 @@
-import { deployAssignSchema } from "../../dal.js";
-import type { AssignFuncArgs, GetAssignProps } from "./index.js";
+import { deployAssignSchema } from "../../dal";
+import type { AssignFuncArgs, GetAssign } from "./index";
+import type { DeployAssignReturn } from "client/ao-mu";
 
 
-export async function sendAssign(env: GetAssignProps, args: AssignFuncArgs): Promise<{ assignmentId: string }> {
+export async function sendAssign(env: GetAssign, args: AssignFuncArgs): Promise<DeployAssignReturn> {
   const deployAssign = deployAssignSchema.implement(env.deployAssign);
   const result = await deployAssign({
     process: args.process,

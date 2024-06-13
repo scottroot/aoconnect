@@ -1,13 +1,22 @@
-import { connect, serializeCron } from "./index.common.js";
+import { connect, serializeCron } from "./index.common";
+import { WalletClient } from "./client/browser";
 
-import { WalletClient } from "./client/browser/index.js";
 
-const GATEWAY_URL = globalThis.GATEWAY_URL || undefined;
-const MU_URL = globalThis.MU_URL || undefined;
-const CU_URL = globalThis.CU_URL || undefined;
-const GRAPHQL_URL = globalThis.GRAPHQL_URL || undefined;
+const GATEWAY_URL: string | undefined = globalThis.GATEWAY_URL || undefined;
+const MU_URL: string | undefined = globalThis.MU_URL || undefined;
+const CU_URL: string | undefined = globalThis.CU_URL || undefined;
+const GRAPHQL_URL: string | undefined = globalThis.GRAPHQL_URL || undefined;
 
-const { result, results, message, spawn, monitor, unmonitor, dryrun, assign } = connect({ GATEWAY_URL, MU_URL, CU_URL, GRAPHQL_URL });
+const {
+  result,
+  results,
+  message,
+  spawn,
+  monitor,
+  unmonitor,
+  dryrun,
+  assign
+} = connect({ GATEWAY_URL, MU_URL, CU_URL, GRAPHQL_URL });
 
 export { result, results, message, spawn, monitor, unmonitor, dryrun, assign };
 export { connect };

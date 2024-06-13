@@ -1,4 +1,10 @@
-import { map } from 'ramda'
+import type { Tag, AnyTag } from "../../types";
+
+
+export interface SerializeCron {
+  interval: string | any;
+  tags?: AnyTag[];
+}
 /**
  * @typedef Cron
  * @property {string} interval
@@ -7,32 +13,34 @@ import { map } from 'ramda'
  * @param {Cron} cron
  * @returns {{ name: string, value: string }[]}
  */
+export function serializeCron(cron: SerializeCron): Tag[] {
+  function parseInterval(interval: any): string {
+    if (typeof interval !== "string") throw new Error("Encountered Error serializing cron: invalid interval");
+    const [value, unit] = interval.split("-").map((s) => s.trim());
+    if (!value || !unit) throw new Error("Encountered Error serializing cron: invalid interval");
+    if (!parseInt(value) || parseInt(value) < 0) throw new Error("Encountered Error serializing cron: invalid interval value");
 
-export function serializeCron (cron) {
-  function parseInterval (interval = '') {
-    if (typeof interval !== 'string') throw new Error('Encountered Error serializing cron: invalid interval')
-    const [value, unit] = interval.split('-').map(s => s.trim())
-    if (!value || !unit) throw new Error('Encountered Error serializing cron: invalid interval')
-    if (!parseInt(value) || parseInt(value) < 0) throw new Error('Encountered Error serializing cron: invalid interval value')
+    const singularRegex = /^(millisecond|second|minute|hour|day|month|year|block)$/;
+    const pluralRegex = /^(milliseconds|seconds|minutes|hours|days|months|years|blocks)$/;
+    const unitSingularMatch = unit.match(singularRegex);
+    const unitPluralMatch = unit.match(pluralRegex);
 
-    const singularRegex = /^(millisecond|second|minute|hour|day|month|year|block)$/
-    const pluralRegex = /^(milliseconds|seconds|minutes|hours|days|months|years|blocks)$/
-    const unitSingularMatch = unit.match(singularRegex)
-    const unitPluralMatch = unit.match(pluralRegex)
-
-    if ((parseInt(value) > 1 && !unitPluralMatch) || (parseInt(value) === 1 && !unitSingularMatch)) throw new Error('Encountered Error serializing cron: invalid interval type')
-    return `${value}-${unit}`
+    if ((parseInt(value) > 1 && !unitPluralMatch) || (parseInt(value) === 1 && !unitSingularMatch))
+      throw new Error("Encountered Error serializing cron: invalid interval type");
+    return `${value}-${unit}`;
   }
 
-  function parseTags (tags = []) {
-    return map((tag) => {
-      if (!tag.name || !tag.value) throw new Error('Encountered Error serializing cron: invalid tag structure')
-      if (typeof tag.name !== 'string' || typeof tag.value !== 'string') throw new Error('Encountered Error serializing cron: invalid interval tag types')
-      return { name: `Cron-Tag-${tag.name}`, value: tag.value }
-    }, tags)
+  function parseTags(tags: AnyTag[] = []): Tag[] {
+    return tags.map((tag) => {
+      if (!tag.name || !tag.value) throw new Error("Encountered Error serializing cron: invalid tag structure");
+      if (typeof tag.name !== "string" || typeof tag.value !== "string")
+        throw new Error("Encountered Error serializing cron: invalid interval tag types");
+      return { name: `Cron-Tag-${tag.name}`, value: tag.value };
+    });
   }
-  const interval = parseInterval(cron.interval)
-  const tags = parseTags(cron.tags)
 
-  return [{ name: 'Cron-Interval', value: interval }, ...tags]
+  const interval = parseInterval(cron.interval);
+  const tags = parseTags(cron.tags);
+
+  return [{ name: "Cron-Interval", value: interval }, ...tags];
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
-import type { Logger } from "../logger.js";
-import type { Tag } from "../types.js";
+import type { Logger } from "../logger";
+import type { Tag } from "../types";
+import { errFrom } from "../lib/utils";
 
 
 export const transactionConnectionSchema = z.object({
@@ -36,7 +37,7 @@ export type GraphqlResult = {
   };
 };
 
-export interface LoadTransactionMetaProps {
+export interface LoadTransactionMetaArgs {
   fetch: (url: string, options: RequestInit) => Promise<Response>;
   GRAPHQL_URL: string;
   logger: Logger;
@@ -45,7 +46,7 @@ export interface LoadTransactionMetaProps {
 /*
  @param id - the id of the contract whose src is being loaded
  */
-export type LoadTransactionMetaFunc = (id: string) => Promise<LoadTransactionMetaFuncReturn>;
+// export type LoadTransactionMetaFunc = (id: string) => Promise<LoadTransactionMetaFuncReturn>;
 
 // export type LoadTransactionMetaFuncReturn = z.infer<typeof transactionConnectionSchema>['data']['transactions']['edges'][number]['node'];
 export type LoadTransactionMetaFuncReturn = {tags: Tag[], [key: string]: any};
@@ -99,7 +100,7 @@ export class LoadTransactionMeta {
   private GRAPHQL_URL: string;
   private query_template: string;
 
-  constructor({ logger, fetch, GRAPHQL_URL }: LoadTransactionMetaProps) {
+  constructor({ logger, fetch, GRAPHQL_URL }: LoadTransactionMetaArgs) {
     this.logger = logger;
     this.fetch = fetch;
     this.GRAPHQL_URL = GRAPHQL_URL;
@@ -143,9 +144,9 @@ export class LoadTransactionMeta {
       const graphqlResponseJson = await response.json();
       const transaction = transactionConnectionSchema.parse(graphqlResponseJson);
       return transaction.data.transactions.edges[0].node as LoadTransactionMetaFuncReturn;
-    } catch (error) {
+    } catch (error: any) {
       this.logger("Error: %s", error.message);
-      throw error;
+      throw errFrom(error);
     }
   }
 }

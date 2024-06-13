@@ -1,4 +1,4 @@
-import type { Tag } from "../types.js";
+import type { Tag } from "../types";
 
 
 export interface CUEnv {

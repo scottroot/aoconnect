@@ -1,1 +1,1 @@
-export * as WalletClient from './wallet.js'
+export * as WalletClient from "./wallet";

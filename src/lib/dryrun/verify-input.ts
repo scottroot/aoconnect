@@ -1,5 +1,6 @@
 import { z } from "zod";
-import type { Message } from "../../client/ao-cu.ts";
+import type { Message } from "../../client/ao-cu";
+import type { Tag } from "../../types";
 
 
 const inputSchema = z.object({
@@ -14,15 +15,17 @@ const inputSchema = z.object({
 export function verifyInput(msg: Message): Message {
   const validatedMsg = inputSchema.parse(msg);
   const newTags = [
-    ...validatedMsg.Tags,
+    ...validatedMsg.Tags.map((tag) => tag as Tag),
     { name: "Data-Protocol", value: "ao" },
     { name: "Type", value: "Message" },
     { name: "Variant", value: "ao.TN.1" },
   ];
   return {
-    ...validatedMsg,
-    Tags: newTags,
+    Id: validatedMsg.Id,
+    Target: validatedMsg.Target,
+    Owner: validatedMsg.Owner,
     Anchor: validatedMsg.Anchor ?? "ABCD",
     Data: validatedMsg.Data ?? Math.random().toString().slice(-4),
+    Tags: newTags,
   };
 }

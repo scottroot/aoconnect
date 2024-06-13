@@ -1,9 +1,9 @@
-import { verifyInput } from "./verify-input.js";
-import type { Message, Result } from "../../client/ao-cu.ts";
-import type { Logger } from "../../logger.js";
-import type { Tag } from "../../types.js";
-import { errFrom } from "../utils.js";
-import { dryrunResultSchema } from "../../dal.js";
+import { verifyInput } from "./verify-input";
+import type { Message, Result } from "../../client/ao-cu";
+import type { Logger } from "../../logger";
+import type { Tag } from "../../types";
+import { errFrom } from "../utils";
+import { dryrunResultSchema } from "../../dal";
 
 
 function coalesceMsg({ process, data, tags, anchor, ...rest }: DryrunFuncArgs): Message {
@@ -18,7 +18,7 @@ function coalesceMsg({ process, data, tags, anchor, ...rest }: DryrunFuncArgs): 
   };
 }
 
-export interface GetDryrunProps {
+export interface GetDryrun {
   dryrunFetch: (msg: Message, ...args_1: unknown[]) => Promise<Result>;
   logger: Logger;
 }
@@ -35,7 +35,7 @@ export interface DryrunFuncArgs {
   anchor?: string;
 }
 
-export function getDryrun(env: GetDryrunProps): DryrunFunc {
+export function getDryrun(env: GetDryrun): DryrunFunc {
   const dryrunFetch = dryrunResultSchema.implement(env.dryrunFetch);
 
   return async (args: DryrunFuncArgs) => {

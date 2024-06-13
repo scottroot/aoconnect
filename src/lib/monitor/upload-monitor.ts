@@ -1,8 +1,8 @@
-import { deployMonitorSchema, signerSchema } from "../../dal.js";
-import type { GetMonitorProps, MonitorFuncArgs } from "./index.js";
+import { deployMonitorSchema, signerSchema } from "../../dal";
+import type { GetMonitor, MonitorFuncArgs } from "./index";
 
 
-export async function uploadMonitor(env: GetMonitorProps, args: MonitorFuncArgs): Promise<{ monitorId: string }> {
+export async function uploadMonitor(env: GetMonitor, args: MonitorFuncArgs): Promise<{ monitorId: string }> {
   const deployMonitor = deployMonitorSchema.implement(env.deployMonitor);
   /**
    * No tags or data can be provided right now,

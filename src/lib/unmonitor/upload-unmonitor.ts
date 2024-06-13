@@ -1,8 +1,8 @@
-import { deployMonitorSchema, signerSchema } from "../../dal.js";
-import type { GetUnmonitorProps, UnmonitorFuncArgs, UnmonitorFuncReturn } from "./index.js";
+import { deployMonitorSchema, signerSchema } from "../../dal";
+import type { GetUnmonitor, UnmonitorFuncArgs, UnmonitorFuncReturn } from "./index.js";
 
 
-export async function uploadUnmonitor(env: GetUnmonitorProps, args: UnmonitorFuncArgs): Promise<UnmonitorFuncReturn> {
+export async function uploadUnmonitor(env: GetUnmonitor, args: UnmonitorFuncArgs): Promise<UnmonitorFuncReturn> {
   const deployUnmonitor = deployMonitorSchema.implement(env.deployUnmonitor);
   /**
    * No tags or data can be provided right now,

@@ -1,8 +1,8 @@
-import { errFrom } from "../utils.js";
-import { readWith } from "./read.js";
 import { z } from "zod";
-import type { Logger } from "../../logger.js";
-import type { LoadResultParams } from "../../client/ao-cu.js";
+import { errFrom } from "../utils";
+import { read } from "./read";
+import type { Logger } from "../../logger";
+import type { LoadResultParams } from "../../client/ao-cu";
 
 
 const inputSchema = z.object({
@@ -11,8 +11,13 @@ const inputSchema = z.object({
 });
 
 export function verifyInput(ctx: any): any {
-  inputSchema.parse(ctx);
-  return ctx;
+  try {
+    inputSchema.parse(ctx);
+    return ctx;
+  } catch (error: any) {
+    console.log(`Error verifying input: ${error}\n${JSON.stringify({ ctx })}`);
+  }
+
 }
 
 interface MessageResult {
@@ -26,26 +31,30 @@ export interface ResultFuncArgs {
   message: string;
   process: string;
 }
+export type ResultContext = {
+  id: string;
+  processId: string;
+}
 
 export type ResultFunc = (args: ResultFuncArgs) => Promise<MessageResult>;
 
-export interface GetResultProps {
+export interface GetResult {
   loadResult: ({ id, processId }: LoadResultParams) => Promise<any>;
   logger: Logger;
 }
 
-export function getResult(_env: GetResultProps): ResultFunc {
-  const env = verifyInput(_env);
-  const read = readWith(env);
-
-  return async ({ message, process }: ResultFuncArgs): Promise<MessageResult> => {
+export function getResult(env: GetResult): ResultFunc {
+  return async (args: ResultFuncArgs): Promise<MessageResult> => {
     try {
-      let result: any = { id: message, processId: process };
+      console.log(`getResult, args = ${JSON.stringify(args)}`);
+      const ctx: ResultContext = { id: args.message, processId: args.process };
+      inputSchema.parse(ctx);
 
-      result = await verifyInput(result);
-      result = await read(result);
+      // let result = await verifyInput(ctx);
+      // result = read(env, args);
+      const result = await read(env, ctx);
 
-      env.logger.tap('readResult result for message "%s": %O', message)(result);
+      env.logger.tap('readResult result for message "%s": %O', result);
 
       return result;
     } catch (error) {

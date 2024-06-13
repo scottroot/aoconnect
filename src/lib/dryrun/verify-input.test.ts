@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import * as assert from "node:assert";
 
-import { verifyInput } from "./verify-input.js";
+import { verifyInput } from "./verify-input";
 
 
 test("verify input of a message", async () => {
