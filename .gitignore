@@ -3,3 +3,4 @@ dist
 ao-cache*
 archive
 *.sublime-workspace
+/archive/
