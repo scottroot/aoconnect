@@ -1,6 +1,3 @@
-// import "./hack.js";
-// import { connect as schedulerUtilsConnect } from "@permaweb/ao-scheduler-utils";
-
 import * as MuClient from "./client/ao-mu";
 import * as CuClient from "./client/ao-cu";
 import * as SuClient from "./client/ao-su";
@@ -166,7 +163,7 @@ export function connect({
   const assignLogger = logger.child("assign");
   const deployAssignInstance = new MuClient.DeployAssign({
     fetch, MU_URL, logger: assignLogger,
-  })
+  });
   const assign = getAssign({
     deployAssign: deployAssignInstance.execute.bind(deployAssignInstance),
     logger: messageLogger,

@@ -7,9 +7,7 @@ import type {
 } from "arconnect";
 import type { DataItemCreateOptions } from "warp-arbundles";
 import type { SignatureOptions } from "arweave/web/lib/crypto/crypto-interface.js";
-// import type Transaction from "arweave/web/lib/transaction.js";
 import type { JWKInterface } from "arweave/web/lib/wallet.js";
-// import type Transaction from "arweave/web/lib/transaction.js";
 import type Transaction from "arweave/node/lib/transaction";
 
 
