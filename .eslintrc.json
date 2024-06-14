@@ -1,15 +1,23 @@
 {
   "env": {
-    "browser": false,
-    "es6": true,
+    "browser": true,
+    "es2021": true,
     "node": true,
-    "jest": true
+    "es6": true,
+    "jest": false
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "tsconfig.json",
-    "sourceType": "module",
-    "createDefaultProgram": true
+//    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".ts", ".cts", "mts"]
+      }
+    }
   },
   "overrides": [
     {
@@ -19,18 +27,22 @@
     }
   ],
   "plugins": [
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "prettier",
+    "import"
   ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/strict",
-    "prettier" //,
+//    "plugin:@typescript-eslint/strict",
+    "prettier",
 //    "plugin:prettier/recommended",
-//    "plugin:@typescript-eslint/strict"
+//    "plugin:@typescript-eslint/strict",
+    "plugin:import/recommended"
   ],
   "rules": {
+    "import/newline-after-import": ["error", { "count": 2, "exactCount": true }],
     "@typescript-eslint/no-throw-literal": "off",
     "@typescript-eslint/no-import-type-side-effects": "error",
     "@typescript-eslint/no-unnecessary-condition": "off",
