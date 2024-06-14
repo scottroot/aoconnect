@@ -33,30 +33,12 @@ const DEFAULT_CU_URL = "https://cu.ao-testnet.xyz";
 
 export { serializeCron } from "./lib/serializeCron";
 
-/**
- * Establishes connection with mutliple different services and sets up various components related to process management.
- *
- * @param {Object} config - A configuration object including:
- *   - {string} GRAPHQL_URL - The URL of the GraphQL service; if not provided, it will use the `GATEWAY_URL` and append `/graphql`.
- *   - {string} GATEWAY_URL - The URL of the gateway service; if not provided, uses a pre-defined `DEFAULT_GATEWAY_URL`.
- *   - {string} MU_URL - The url of the Main Unit (MU) service; if not provided, uses a pre-defined `DEFAULT_MU_URL`.
- *   - {string} CU_URL - The url of the Control Unit (CU) service; if not provided, uses a pre-defined `DEFAULT_CU_URL`.
- *
- * @throws {Error} If neither `GRAPHQL_URL` nor `GATEWAY_URL` are provided.
- *
- * @returns {Object} Returns an object having following properties:
- // *   - {Function} result - An equipped function for fetching individual process' result.
- // *   - {Function} results - An equipped function for fetching batch of process results given a specified range.
- // *   - {Function} message - An out-of-box writeInteraction function which writes signed data item for message to the MU.
- // *   - {Function} spawn - An out-of box function for spawning the process via MU which takes care of validating inputs as well.
- // *   - {Function} monitor - An out-of-box function for posting a signed message via the MU /monitor/:process endpoint.
- // *   - {Function} unmonitor - An out-of-box function for posting a signed message (unmonitor request) via the MU /monitor/:process endpoint.
- // *   - {Function} dryrun - A function for sending a message object to the CU and returning a result.
- // *   - {Function} assign - A function for posting an Assignment to the MU.
- */
 export function connect({
-  GRAPHQL_URL = "", GATEWAY_URL = DEFAULT_GATEWAY_URL, MU_URL = DEFAULT_MU_URL, CU_URL = DEFAULT_CU_URL
-} = {}): {
+  GRAPHQL_URL = "",
+  GATEWAY_URL = DEFAULT_GATEWAY_URL,
+  MU_URL = DEFAULT_MU_URL,
+  CU_URL = DEFAULT_CU_URL
+}): {
   result: ResultFunc;
   results: ResultsFunc;
   message: MessageFunc;
@@ -66,19 +48,21 @@ export function connect({
   dryrun: DryrunFunc;
   assign: AssignFunc;
 } {
+  console.log(JSON.stringify({ CU_URL, MU_URL, GATEWAY_URL, GRAPHQL_URL }));
   const logger = createLogger();
   if (!GRAPHQL_URL) {
     GRAPHQL_URL = joinUrl({ url: GATEWAY_URL, path: "/graphql" });
   }
-  // const schedulerUtilsConnect = await import("@permaweb/ao-scheduler-utils").then(m => m.connect);
   const { validate } = schedulerUtilsConnect({ cacheSize: 100, GRAPHQL_URL });
-  // const { validate } = import("@permaweb/ao-scheduler-utils").then(m => m.connect({ cacheSize: 100, GRAPHQL_URL }));
 
   const processMetaCache = SuClient.createProcessMetaCache({ MAX_SIZE: 25 });
 
   const resultLogger = logger.child("result");
+  const loadResultInstance = new CuClient.LoadResult({
+    fetch, CU_URL, logger: resultLogger
+  });
   const result = getResult({
-    loadResult: new CuClient.LoadResult({ fetch, CU_URL, logger: resultLogger }).execute,
+    loadResult: loadResultInstance.execute.bind(loadResultInstance),
     logger: resultLogger,
   });
 
@@ -87,10 +71,15 @@ export function connect({
    * - writes signed data item for message to the MU
    */
   const messageLogger = logger.child("message");
+  const messageLoadInstance = new SuClient.LoadProcessMeta({
+    fetch, cache: processMetaCache, logger: messageLogger
+  });
+  const deployMessageInstance = new MuClient.DeployMessage({
+    fetch, MU_URL, logger: messageLogger
+  });
   const message = getMessage({
-    loadProcessMeta: new SuClient.LoadProcessMeta({ fetch, cache: processMetaCache, logger: messageLogger }).execute,
-    // locateScheduler: locate,
-    deployMessage: new MuClient.DeployMessage({ fetch, MU_URL, logger: messageLogger }).execute,
+    loadProcessMeta: messageLoadInstance.execute.bind(messageLoadInstance),
+    deployMessage: deployMessageInstance.execute.bind(deployMessageInstance),
     logger: messageLogger,
   });
 
@@ -100,10 +89,16 @@ export function connect({
    * - spawns the process via the MU
    */
   const spawnLogger = logger.child("spawn");
+  const loadTransactionMetaInstance = new GatewayClient.LoadTransactionMeta({
+    fetch, GRAPHQL_URL, logger: spawnLogger
+  });
+  const deployProcessInstance = new MuClient.DeployProcess({
+    fetch, MU_URL, logger: spawnLogger
+  });
   const spawn = getSpawn({
-    loadTransactionMeta: new GatewayClient.LoadTransactionMeta({ fetch, GRAPHQL_URL, logger: spawnLogger }).execute,
+    loadTransactionMeta: loadTransactionMetaInstance.execute.bind(loadTransactionMetaInstance),
     validateScheduler: validate,
-    deployProcess: new MuClient.DeployProcess({ fetch, MU_URL, logger: spawnLogger }).execute,
+    deployProcess: deployProcessInstance.execute.bind(deployProcessInstance),
     logger: spawnLogger,
   });
 
@@ -113,14 +108,15 @@ export function connect({
    * - post a signed message via the MU /monitor/:process endpoint
    */
   const monitorLogger = logger.child("monitor");
+  const monitorLoadInstance = new SuClient.LoadProcessMeta({
+    fetch, cache: processMetaCache, logger: monitorLogger,
+  });
+  const deployMonitorInstance = new MuClient.DeployMonitor({
+    fetch, MU_URL, logger: monitorLogger
+  });
   const monitor = getMonitor({
-    loadProcessMeta: new SuClient.LoadProcessMeta({
-      fetch,
-      cache: processMetaCache,
-      logger: monitorLogger,
-    }).execute,
-    // locateScheduler: locate,
-    deployMonitor: new MuClient.DeployMonitor({ fetch, MU_URL, logger: monitorLogger }).execute,
+    loadProcessMeta: monitorLoadInstance.execute.bind(monitorLoadInstance),
+    deployMonitor: deployMonitorInstance.execute.bind(deployMonitorInstance),
     logger: monitorLogger,
   });
 
@@ -130,12 +126,11 @@ export function connect({
    * - post a signed message via the MU /monitor/:process endpoint
    */
   const unmonitorLogger = logger.child("unmonitor");
+  const unmonitorLoadInstance = new SuClient.LoadProcessMeta({
+    fetch, cache: processMetaCache, logger: unmonitorLogger,
+  });
   const unmonitor = getUnmonitor({
-    loadProcessMeta: new SuClient.LoadProcessMeta({
-      fetch,
-      cache: processMetaCache,
-      logger: unmonitorLogger,
-    }).execute,
+    loadProcessMeta: unmonitorLoadInstance.execute.bind(unmonitorLoadInstance),
     // locateScheduler: locate,
     deployUnmonitor: new MuClient.DeployUnmonitor({ fetch, MU_URL, logger: unmonitorLogger }).execute,
     logger: monitorLogger,
@@ -145,8 +140,11 @@ export function connect({
    * results - returns batch of Process Results given a specified range
    */
   const resultsLogger = logger.child("results");
+  const queryResultsInstance = new CuClient.QueryResults({
+    fetch, CU_URL, logger: resultsLogger
+  });
   const results = getResults({
-    queryResults: new CuClient.QueryResults({ fetch, CU_URL, logger: resultsLogger }).execute,
+    queryResults: queryResultsInstance.execute.bind(queryResultsInstance),
     logger: resultsLogger,
   });
 
@@ -154,8 +152,11 @@ export function connect({
    * dryrun - sends a message object to the cu and returns a result
    */
   const dryrunLogger = logger.child("dryrun");
+  const dryrunFetchInstance = new CuClient.DryrunFetch({
+    fetch, CU_URL, logger: dryrunLogger
+  });
   const dryrun = getDryrun({
-    dryrunFetch: new CuClient.DryrunFetch({ fetch, CU_URL, logger: dryrunLogger }).execute,
+    dryrunFetch: dryrunFetchInstance.execute.bind(dryrunFetchInstance),
     logger: dryrunLogger,
   });
 
@@ -163,12 +164,11 @@ export function connect({
    * POSTs an Assignment to the MU
    */
   const assignLogger = logger.child("assign");
+  const deployAssignInstance = new MuClient.DeployAssign({
+    fetch, MU_URL, logger: assignLogger,
+  })
   const assign = getAssign({
-    deployAssign: new MuClient.DeployAssign({
-      fetch,
-      MU_URL,
-      logger: assignLogger,
-    }).execute,
+    deployAssign: deployAssignInstance.execute.bind(deployAssignInstance),
     logger: messageLogger,
   });
 
