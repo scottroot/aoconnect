@@ -1,6 +1,7 @@
 node_modules
 dist
 ao-cache*
-archive
+archive*
 *.sublime-workspace
 /archive/
+.idea
