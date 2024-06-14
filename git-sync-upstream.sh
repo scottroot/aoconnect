@@ -26,3 +26,4 @@ else
   echo "Rebase completed successfully."
 fi
 
+# git push origin main --force

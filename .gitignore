@@ -1,5 +1,4 @@
 node_modules
-dist
 ao-cache*
 archive*
 *.sublime-workspace
